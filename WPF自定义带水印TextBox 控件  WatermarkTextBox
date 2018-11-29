@@ -1,0 +1,67 @@
+//https://blog.csdn.net/puchitomato/article/details/12248691
+
+转自以上链接，自己添加了Enter响应事件。
+    public class WatermarkTextBox : TextBox
+    {
+        private string watermark = string.Empty;
+        public string Watermark
+        {
+            get { return watermark; }
+            set { watermark = value ?? string.Empty; }
+        }
+
+        public static readonly DependencyProperty WatermarkProperty =
+            DependencyProperty.Register("Watermark", typeof(string), typeof(WatermarkTextBox));
+
+        static WatermarkTextBox()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(WatermarkTextBox),
+                new FrameworkPropertyMetadata(typeof(WatermarkTextBox)));  
+        }
+        public WatermarkTextBox() {
+            this.KeyDown += WatermarkTextBox_KeyDown;
+        }
+
+        private void WatermarkTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                TraversalRequest request = new TraversalRequest(FocusNavigationDirection.Next);
+
+                UIElement focusElement = Keyboard.FocusedElement as UIElement;
+                if (focusElement != null)
+                {
+                    focusElement.MoveFocus(request);
+                }
+                e.Handled = true;
+            }
+        }
+
+        protected override void OnTextChanged(TextChangedEventArgs e)
+        {
+            base.OnTextChanged(e);
+
+            if (this.Text == string.Empty)
+            {
+                VisualStateManager.GoToState(this, "Empty", true);
+            }
+            else
+            {
+                VisualStateManager.GoToState(this, "NotEmpty", true);
+            }
+        }
+    }
+    public enum TextStates
+    {
+        /// <summary>
+        /// 内容为空
+        /// </summary>
+        Empty,
+        /// <summary>
+        /// 内容不为空
+        /// </summary>
+        NotEmpty
+    }
+
+样例：
+
