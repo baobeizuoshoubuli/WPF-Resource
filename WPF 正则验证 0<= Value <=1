@@ -1,0 +1,55 @@
+正则：^(0\.\d+|[1-9][0-9]|1)$
+
+TextBox绑定正则验证
+
+<TextBox x:Name="txb"   MaxLength="6" Margin="1 0 0 0"  Width="40" >
+    <TextBox.Text>
+        <Binding Path="Opacity" ValidatesOnExceptions="True" ValidatesOnDataErrors="True" StringFormat="F2"            
+          Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"                              >
+            <Binding.ValidationRules>
+                <shared1:InventoryValidationRule  InventoryPattern="^(0\.\d+|[1-9][0-9]|1)$"/>
+            </Binding.ValidationRules>
+       </Binding>
+    </TextBox.Text>
+</TextBox>
+
+ 
+
+用到的InventoryValidationRule类：
+
+ public class InventoryValidationRule : ValidationRule
+    {
+        #region Properties
+
+        public string InventoryPattern { get; set; }
+
+        #endregion Properties
+
+        #region Methods
+
+        public override ValidationResult Validate(
+                  object value, CultureInfo cultureInfo)
+        {
+            if (InventoryPattern == null)
+                return ValidationResult.ValidResult;
+
+            if (!(value is string))
+                return new ValidationResult(false,
+               "Inventory should be a comma separated list of model numbers as a string");
+
+            string[] pieces = value.ToString().Split(',');
+            Regex m_RegEx = new Regex(InventoryPattern);
+
+            foreach (string item in pieces)
+            {
+                Match match = m_RegEx.Match(item);
+                if (match == null || match == Match.Empty)
+                    return new ValidationResult(
+                      false, "Invalid input format");
+            }
+
+            return ValidationResult.ValidResult;
+        }
+
+        #endregion Methods
+    }
